@@ -12,20 +12,22 @@ class node:
     	self.children.append(node)
 
 
+
 class tree:
 	def __init__(self):
 		self.list_of_nodes=[]
-		self.list_of_nodes.append(node([],[],'root'))
+		self.list_of_nodes.append(node([],[1,2],'root'))
 		self.list_of_nodes.append(node([0],[],'market'))
 		self.list_of_nodes.append(node([0],[],'survey'))
 
 	def add_node(self,node):
 		self.list_of_nodes.append(node)
+		self.list_of_nodes[node.parent].children.append(len(self.list_of_nodes))
 
 	def __str__(self):
 		string = ''
 		for i in range(len(self.list_of_nodes)):
-			string = string + ' node ' +str(i) + ' ' + (str(self.list_of_nodes[i]))
+			string = string + ' node ' +str(i) + ' ' + (str(self.list_of_nodes[i]) + '\n')
 		return string
 
 	def get_node(self,number):
