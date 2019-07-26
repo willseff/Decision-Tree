@@ -2,13 +2,30 @@ import numpy as np
 
 LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.23],[0,123,0.84,0.001,0.3],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064]]
 
+def list_multiply(a,b):	
+	new_list = [0,0,0,0,0]
+	print(a)
+	print(b)
+	for i in range(len(a)):
+		value = a[i]*b[i]
+		new_list[i] = value
+	print(new_list)
+	return new_list
+
+def list_divide(a,d):
+	new_list = [0,0,0,0,0]
+	for i in range(len(a)):
+		value = a[i]/d
+		print(value)
+		new_list[i] = value
+	return new_list
+
 class node:
     def __init__(self,p,c,t):
 
         self.parent = p
         self.children = c
         self.node_type = t
-        self.priors = []
         self.posteriors = []
 
     def __str__(self):
@@ -30,10 +47,12 @@ class tree:
 
 	def add_node(self,node):
 		priors = self.list_of_nodes[node.parent].posteriors
+		print('node' + str(len(self.list_of_nodes)-1))
+		print(str(node.node_type))
 		if (node.node_type in [0,1,2,3,4,5]):
-			joint_probablity = np.multiply(priors,LIKELIHOODS[node.node_type])
+			joint_probablity = list_multiply(priors,LIKELIHOODS[node.node_type])
 			sum_joint = sum(joint_probablity)
-			node.posteriors = [joint_probablity/sum_joint]
+			node.posteriors = [list_divide(joint_probablity,sum_joint)]
 		else:
 			node.posteriors = priors
 		self.list_of_nodes.append(node)
@@ -81,3 +100,5 @@ add_layer(t, 'decision')
 add_layer(t,'outcome')
 add_layer(t, 'decision')
 print(t)
+
+[array([0.        , 0.54468085, 0.34468085, 0.10212766, 0.00851064])]
