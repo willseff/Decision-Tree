@@ -19,7 +19,7 @@ class tree:
 		self.list_of_nodes.append(node([0],[],'market'))
 		self.list_of_nodes.append(node([0],[],'survey'))
 
-	def add_node(node):
+	def add_node(self,node):
 		self.list_of_nodes.append(node)
 
 	def __str__(self):
@@ -36,7 +36,6 @@ class tree:
 
 t = tree()
 n= node([0],[2,3,4,5],'survey')
-print(t)
 
 if(not t.get_node(0).children):
 	print('j')
@@ -47,5 +46,11 @@ def add_layer(tree,layer_type):
 		print('k')
 	if (layer_type == 'outcome'):
 		for i in range(tree.len()):
-			if (not tree.get_node(i).children and tree.get_node(i).node_type != 'market'):
-				print('k')
+			if (not tree.get_node(i).children and tree.get_node(i).node_type == 'survey'):
+				for k in range(6):
+					tree.add_node(node(i,[],k))
+
+				
+
+add_layer(t,'outcome')
+print(t)
