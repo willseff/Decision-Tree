@@ -92,13 +92,13 @@ class tree:
 	def update_expected_values(self):
 		#use after placing end nodes
 		#must end with a outcome layer
-		expected_value = 0
 		for i in reversed(range(len(self.list_of_nodes))):
 			print(i)
 			if (self.list_of_nodes[i].node_type == 'end'):
 				pass
 			elif(self.list_of_nodes[i].node_type == 'survey'):
 				probablities = survey_outcome_odds(self.list_of_nodes[i].posteriors)
+				expected_value=0
 				for k in range(6):
 					nodek = self.list_of_nodes[self.list_of_nodes[i].children[k]]
 					expected_value=expected_value + (probablities[k] * nodek.expected_value)
