@@ -91,8 +91,10 @@ class tree:
 
 	def update_expected_values(self):
 		#use after placing end nodes
+		#must end with a outcome layer
 		expected_value = 0
 		for i in reversed(range(len(self.list_of_nodes))):
+			print(i)
 			if (self.list_of_nodes[i].node_type == 'end'):
 				pass
 			elif(self.list_of_nodes[i].node_type == 'survey'):
@@ -100,14 +102,13 @@ class tree:
 				for k in range(6):
 					nodek = self.list_of_nodes[self.list_of_nodes[i].children[k]]
 					expected_value=expected_value + (probablities[k] * nodek.expected_value)
-			#elif(self.list_of_nodes[i].node_type in range(6)):
-				#self.list_of_nodes[i].expected_value = 
+				self.list_of_nodes[i].expected_value = expected_value
+			elif(self.list_of_nodes[i].node_type in range(6)):
+				child = self.list_of_nodes[i].children[0]
+				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
 			elif(self.list_of_nodes[i].node_type == 'market'):
 				child = self.list_of_nodes[i].children[0]
 				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
-
-
-
 
 
 def add_layer(tree,layer_type):
@@ -129,6 +130,10 @@ def add_layer(tree,layer_type):
 				tree.add_node(node(i,[],'end'))
 
 t = tree()
+add_layer(t,'outcome')
+add_layer(t,'decision')
+add_layer(t,'outcome')
+add_layer(t,'decision')
 add_layer(t,'outcome')
 add_layer(t,'decision')
 add_layer(t,'outcome')
