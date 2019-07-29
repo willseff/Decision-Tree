@@ -1,8 +1,18 @@
 import numpy as np
+import scipy.stats as ss
 
 LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.23],[0,123,0.84,0.001,0.3],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064]]
 MARKETVALUE = 10000000
 MARKETSHARES = [0,0.2,0.4,0.6,0.8]
+def survey_outcome_odds(priors):
+	probablities = [0,0,0,0,0,0]
+	for j in range(6):
+		joint_sum = 0
+		for i in range(5):
+			hh = ss.binom(5, MARKETSHARES[i])
+			joint_sum = joint_sum+hh.pmf(j)*priors[i]
+		probablities[j]=joint_sum	
+	return probablities
 
 def list_one_multiply(a,b):
 	new_list = []
@@ -51,7 +61,6 @@ class tree:
 		self.list_of_nodes[2].posteriors=[0.2,0.2,0.2,0.2,0.2]
 		self.list_of_nodes[1].posteriors=[0.2,0.2,0.2,0.2,0.2]
 
-
 	def add_node(self,node):
 		priors = self.list_of_nodes[node.parent].posteriors
 		if (node.node_type in [0,1,2,3,4,5]):
@@ -80,6 +89,26 @@ class tree:
 	def len(self):
 		return(len(self.list_of_nodes))
 
+	def update_expected_values(self):
+		#use after placing end nodes
+		expected_value = 0
+		for i in reversed(range(len(self.list_of_nodes))):
+			if (self.list_of_nodes[i].node_type == 'end'):
+				pass
+			elif(self.list_of_nodes[i].node_type == 'survey'):
+				probablities = survey_outcome_odds(self.list_of_nodes[i].posteriors)
+				for k in range(6):
+					nodek = self.list_of_nodes[self.list_of_nodes[i].children[k]]
+					expected_value=expected_value + (probablities[k] * nodek.expected_value)
+			#elif(self.list_of_nodes[i].node_type in range(6)):
+				#self.list_of_nodes[i].expected_value = 
+			elif(self.list_of_nodes[i].node_type == 'market'):
+				child = self.list_of_nodes[i].children[0]
+				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
+
+
+
+
 
 def add_layer(tree,layer_type):
 	if (layer_type == 'decision'):
@@ -101,6 +130,11 @@ def add_layer(tree,layer_type):
 
 t = tree()
 add_layer(t,'outcome')
+add_layer(t,'decision')
+add_layer(t,'outcome')
 add_layer(t,'end')
+t.update_expected_values()
 print(t)
+
+	
 
