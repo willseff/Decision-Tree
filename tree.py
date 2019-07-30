@@ -44,6 +44,7 @@ class node:
         self.posteriors = []
         self.expected_value = 0
         self.decision=''
+        self.history=[]
 
     def __str__(self):
     	return 'Parent '+str(self.parent)+' Children '+str(self.children) + ' posteriors ' + str(self.posteriors) + 'nodeType ' + str(self.node_type) + ' eValue ' + str(self.expected_value) + ' decision ' + str(self.decision)
@@ -51,7 +52,8 @@ class node:
     def add_child(self,node):
     	self.children.append(node)
 
-
+    def add_history(self,event):
+    	self.history.append(event)
 
 class tree:
 	def __init__(self):
