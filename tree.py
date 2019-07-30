@@ -3,7 +3,7 @@ import scipy.stats as ss
 
 LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
 MARKETVALUE = 10000000
-MARKETSHARES = [0,0.2,0.4,0.6,0.8]
+MARKETSHARES = [0.1,0.2,0.4,0.6,0.8]
 def survey_outcome_odds(priors):
 	probablities = [0,0,0,0,0,0]
 	for j in range(6):
@@ -43,9 +43,10 @@ class node:
         self.node_type = t
         self.posteriors = []
         self.expected_value = 0
+        self.decision=''
 
     def __str__(self):
-    	return 'Parent '+str(self.parent)+' Children '+str(self.children) + ' posteriors ' + str(self.posteriors) + 'nodeType ' + str(self.node_type) + ' eValue ' + str(self.expected_value)
+    	return 'Parent '+str(self.parent)+' Children '+str(self.children) + ' posteriors ' + str(self.posteriors) + 'nodeType ' + str(self.node_type) + ' eValue ' + str(self.expected_value) + ' decision ' + str(self.decision)
 
     def add_child(self,node):
     	self.children.append(node)
@@ -103,6 +104,7 @@ class tree:
 					nodek = self.list_of_nodes[self.list_of_nodes[i].children[k]]
 					expected_value=expected_value + (probablities[k] * nodek.expected_value)
 				self.list_of_nodes[i].expected_value = expected_value
+
 			elif(self.list_of_nodes[i].node_type in range(6)):
 				if (self.list_of_nodes[self.list_of_nodes[i].children[0]].node_type=='end'):
 					child = self.list_of_nodes[i].children[0]
@@ -111,12 +113,18 @@ class tree:
 					child1 = self.list_of_nodes[self.list_of_nodes[i].children[0]]
 					child2 = self.list_of_nodes[self.list_of_nodes[i].children[1]]
 					if(child1.expected_value>=child2.expected_value):
+						self.list_of_nodes[i].decision = 'survey'
 						self.list_of_nodes[i].expected_value = child1.expected_value
 					else:
 						self.list_of_nodes[i].expected_value = child2.expected_value
+						self.list_of_nodes[i].decision = 'market'
 			elif(self.list_of_nodes[i].node_type == 'market'):
 				child = self.list_of_nodes[i].children[0]
 				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
+
+	def child(self,i,k):
+		#returns kth the child node for node i
+		return self.list_of_nodes(self.list_of_nodes[i].children[k])
 
 def add_layer(tree,layer_type):
 	if (layer_type == 'decision'):
@@ -146,5 +154,5 @@ add_layer(t,'end')
 t.update_expected_values()
 print(t)
 
-	
+
 
