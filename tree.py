@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.stats as ss
 
-LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.23],[0,123,0.84,0.001,0.3],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064],[0,0.4096,0.2592,0.0768,0.0064]]
+LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.23],[0,123,0.84,0.001,0.3],[0,0.4096,0.2592,0.7868,0.0064],[0,0.396,0.2592,0.0768,0.0064],[0,0.4696,0.4592,0.0765,0.0164]]
 MARKETVALUE = 10000000
 MARKETSHARES = [0,0.2,0.4,0.6,0.8]
 def survey_outcome_odds(priors):
@@ -137,8 +137,6 @@ def add_layer(tree,layer_type):
 				tree.add_node(node(i,[],'end'))
 
 t = tree()
-add_layer(t,'outcome')
-add_layer(t,'decision')
 add_layer(t,'outcome')
 add_layer(t,'decision')
 add_layer(t,'outcome')
