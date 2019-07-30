@@ -104,8 +104,12 @@ class tree:
 					expected_value=expected_value + (probablities[k] * nodek.expected_value)
 				self.list_of_nodes[i].expected_value = expected_value
 			elif(self.list_of_nodes[i].node_type in range(6)):
-				child = self.list_of_nodes[i].children[0]
-				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
+				child1 = self.list_of_nodes[i].children[0]
+				child2 = self.list_of_nodes[i].children[1]
+				if(child1.expected_value>=child2.expected_value):
+					self.list_of_nodes[i].expected_value = self.list_of_nodes[child1].expected_value
+				else:
+					self.list_of_nodes[i].expected_value = self.list_of_nodes[child2].expected_value
 			elif(self.list_of_nodes[i].node_type == 'market'):
 				child = self.list_of_nodes[i].children[0]
 				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
