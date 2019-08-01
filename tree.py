@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.stats as ss
+import csv
 
 #likelyhoods are not correct values right now, Will need to changed based on what the priors are
 LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
@@ -68,6 +69,7 @@ class tree:
 		self.list_of_nodes.append(node([0],[],'survey'))
 		self.list_of_nodes[2].posteriors=PRIORS
 		self.list_of_nodes[1].posteriors=PRIORS
+		self.string_representation=[]
 
 	# method for adding nodes. Certain node types will have differnt posteriors based on the node before it's posteroir values
 	def add_node(self,node):
@@ -89,10 +91,14 @@ class tree:
 		self.list_of_nodes[node.parent].children.append(len(self.list_of_nodes)-1)
 	#string represntation of the tree. prints out all nodes
 	def __str__(self):
-		string = ''
 		for i in range(len(self.list_of_nodes)):
-			string = string + ' node ' +str(i) + ' ' + (str(self.list_of_nodes[i]) + '\n')
-		return string
+			self.string_representation.append([i,self.list_of_nodes[i].parent,self.list_of_nodes[i].children,self.list_of_nodes[i].posteriors,self.list_of_nodes[i].node_type,self.list_of_nodes[i].expected_value,self.list_of_nodes[i].decision])
+		return str(self.string_representation)
+	#export to csv
+	def toCSV(self):
+		with open("out.csv", "w", newline="") as f:
+			writer = csv.writer(f)
+			writer.writerows(self.string_representation)
 	# returns a specific nod 
 	def node(self,number):
 		return self.list_of_nodes[number]
@@ -168,6 +174,7 @@ add_layer(t,'outcome')
 add_layer(t,'end')
 t.update_expected_values()
 print(t)
+t.toCSV()
 
 
 
