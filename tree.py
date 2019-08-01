@@ -6,6 +6,7 @@ LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.8
 MARKETVALUE = 10000000
 MARKETSHARES = [0.1,0.2,0.4,0.6,0.8]
 PRIORS = [0.2,0.2,0.2,0.2,0.2]
+#method to return the odds of each survey result happening based on the probabliities
 def survey_outcome_odds(priors):
 	probablities = [0,0,0,0,0,0]
 	for j in range(6):
@@ -15,21 +16,21 @@ def survey_outcome_odds(priors):
 			joint_sum = joint_sum+hh.pmf(j)*priors[i]
 		probablities[j]=joint_sum	
 	return probablities
-
+#methid to multiply a list with one value
 def list_one_multiply(a,b):
 	new_list = []
 	for i in range(len(a)):
 		value = a[i]*b
 		new_list.append(value)
 	return new_list
-
+#method to multupy two lists
 def list_multiply(a,b):	
 	new_list = []
 	for i in range(len(a)):
 		value = a[i]*b[i]
 		new_list.append(value)
 	return new_list
-
+#method to divide two lists
 def list_divide(a,d):
 	new_list = []
 	for i in range(len(a)):
@@ -71,13 +72,15 @@ class tree:
 	# method for adding nodes. Certain node types will have differnt posteriors based on the node before it's posteroir values
 	def add_node(self,node):
 		priors = self.list_of_nodes[node.parent].posteriors
+		#update posteriors if the node is a survey result
 		if (node.node_type in [0,1,2,3,4,5]):
 			joint_probablity = list_multiply(priors,LIKELIHOODS[node.node_type])
 			sum_joint = sum(joint_probablity)
 			node.posteriors = list_divide(joint_probablity,sum_joint)
+		#if not survey result then the posteroirs stay the same
 		else:
 			node.posteriors = priors
-
+		# if there is an end node the expected value will equal the posteroirs multiplied by the revenue of each case
 		if (node.node_type == 'end'):
 			values = list_one_multiply(MARKETSHARES,MARKETVALUE)
 			node.expected_value = sum(list_multiply(values,node.posteriors))
@@ -101,8 +104,10 @@ class tree:
 	def update_expected_values(self):
 		#use after placing end nodes
 		for i in reversed(range(len(self.list_of_nodes))):
+			#if node is end node there is no need to update expected values because the expected value was there there tree initialized
 			if (self.list_of_nodes[i].node_type == 'end'):
 				pass
+			#if node is survey then the expected value will equal the probablities of each survey outcome multiplied by the expected value of each survey outcome
 			elif(self.list_of_nodes[i].node_type == 'survey'):
 				probablities = survey_outcome_odds(self.list_of_nodes[i].posteriors)
 				expected_value=0
@@ -110,7 +115,7 @@ class tree:
 					nodek = self.list_of_nodes[self.list_of_nodes[i].children[k]]
 					expected_value=expected_value + (probablities[k] * nodek.expected_value)
 				self.list_of_nodes[i].expected_value = expected_value
-
+			#if node type is a survey outcome then the expected value will be the larger of the two of the next decision layer. Or if its an end node then it will equal the expected value of the end node
 			elif(self.list_of_nodes[i].node_type in range(6)):
 				if (self.list_of_nodes[self.list_of_nodes[i].children[0]].node_type=='end'):
 					child = self.list_of_nodes[i].children[0]
@@ -124,6 +129,7 @@ class tree:
 					else:
 						self.list_of_nodes[i].expected_value = child2.expected_value
 						self.list_of_nodes[i].decision = 'market'
+			# if the node is a market node then it will equal the expected value of the end node
 			elif(self.list_of_nodes[i].node_type == 'market'):
 				child = self.list_of_nodes[i].children[0]
 				self.list_of_nodes[i].expected_value = self.list_of_nodes[child].expected_value
@@ -152,6 +158,8 @@ def add_layer(tree,layer_type):
 
 #example construction of tree
 t = tree()
+add_layer(t,'outcome')
+add_layer(t,'decision')
 add_layer(t,'outcome')
 add_layer(t,'decision')
 add_layer(t,'outcome')
