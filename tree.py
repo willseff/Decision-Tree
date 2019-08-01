@@ -1,9 +1,11 @@
 import numpy as np
 import scipy.stats as ss
 
+#likelyhoods are not correct values right now, Will need to changed based on what the priors are
 LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
 MARKETVALUE = 10000000
 MARKETSHARES = [0.1,0.2,0.4,0.6,0.8]
+PRIORS = [0.2,0.2,0.2,0.2,0.2]
 def survey_outcome_odds(priors):
 	probablities = [0,0,0,0,0,0]
 	for j in range(6):
@@ -52,7 +54,7 @@ class node:
     #add a child to node, inputs are the node number of the child
     def add_child(self,node):
     	self.children.append(node)
-    #unused method as of now
+    #unused method as of now. can be used to keep track of the history of the child nodes before a node
     def add_history(self,event):
     	self.history.append(event)
 
@@ -63,10 +65,10 @@ class tree:
 		self.list_of_nodes.append(node([],[1,2],'root'))
 		self.list_of_nodes.append(node([0],[],'market'))
 		self.list_of_nodes.append(node([0],[],'survey'))
-		self.list_of_nodes[2].posteriors=[0.2,0.2,0.2,0.2,0.2]
-		self.list_of_nodes[1].posteriors=[0.2,0.2,0.2,0.2,0.2]
+		self.list_of_nodes[2].posteriors=PRIORS
+		self.list_of_nodes[1].posteriors=PRIORS
 
-
+	# method for adding nodes. Certain node types will have differnt posteriors based on the node before it's posteroir values
 	def add_node(self,node):
 		priors = self.list_of_nodes[node.parent].posteriors
 		if (node.node_type in [0,1,2,3,4,5]):
@@ -82,24 +84,23 @@ class tree:
 
 		self.list_of_nodes.append(node)
 		self.list_of_nodes[node.parent].children.append(len(self.list_of_nodes)-1)
-
+	#string represntation of the tree. prints out all nodes
 	def __str__(self):
 		string = ''
 		for i in range(len(self.list_of_nodes)):
 			string = string + ' node ' +str(i) + ' ' + (str(self.list_of_nodes[i]) + '\n')
 		return string
-
+	# returns a specific nod 
 	def node(self,number):
 		return self.list_of_nodes[number]
-
+	#number of node in a tree
 	def len(self):
 		return(len(self.list_of_nodes))
 
+	#method used to update expected values after tree is created
 	def update_expected_values(self):
 		#use after placing end nodes
-		#must end with a outcome layer
 		for i in reversed(range(len(self.list_of_nodes))):
-			print(i)
 			if (self.list_of_nodes[i].node_type == 'end'):
 				pass
 			elif(self.list_of_nodes[i].node_type == 'survey'):
@@ -130,7 +131,7 @@ class tree:
 	def child(self,i,k):
 		#returns kth the child node for node i
 		return self.list_of_nodes(self.list_of_nodes[i].children[k])
-
+#methods used to add layers to a tree. Can be a outcome or decision or end layer. Last layer must be an end layer
 def add_layer(tree,layer_type):
 	if (layer_type == 'decision'):
 		for i in range(tree.len()):
@@ -149,6 +150,7 @@ def add_layer(tree,layer_type):
 			if (not tree.node(i).children):
 				tree.add_node(node(i,[],'end'))
 
+#example construction of tree
 t = tree()
 add_layer(t,'outcome')
 add_layer(t,'decision')
