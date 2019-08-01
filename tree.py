@@ -35,6 +35,7 @@ def list_divide(a,d):
 		new_list.append(value)
 	return new_list
 
+#node class stores data about each node
 class node:
     def __init__(self,p,c,t):
 
@@ -45,16 +46,17 @@ class node:
         self.expected_value = 0
         self.decision=''
         self.history=[]
-
+    #string representation of tree
     def __str__(self):
     	return 'Parent '+str(self.parent)+' Children '+str(self.children) + ' posteriors ' + str(self.posteriors) + 'nodeType ' + str(self.node_type) + ' eValue ' + str(self.expected_value) + ' decision ' + str(self.decision)
-
+    #add a child to node, inputs are the node number of the child
     def add_child(self,node):
     	self.children.append(node)
-
+    #unused method as of now
     def add_history(self,event):
     	self.history.append(event)
 
+#tree class implements tree 
 class tree:
 	def __init__(self):
 		self.list_of_nodes=[]
@@ -63,6 +65,7 @@ class tree:
 		self.list_of_nodes.append(node([0],[],'survey'))
 		self.list_of_nodes[2].posteriors=[0.2,0.2,0.2,0.2,0.2]
 		self.list_of_nodes[1].posteriors=[0.2,0.2,0.2,0.2,0.2]
+
 
 	def add_node(self,node):
 		priors = self.list_of_nodes[node.parent].posteriors
