@@ -7,6 +7,7 @@ LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.8
 MARKETVALUE = 10000000
 MARKETSHARES = [0.1,0.2,0.4,0.6,0.8]
 PRIORS = [0.2,0.2,0.2,0.2,0.2]
+SURVEYCOST = 1000000000
 #method to return the odds of each survey result happening based on the probabliities
 def survey_outcome_odds(priors):
 	probablities = [0,0,0,0,0,0]
@@ -65,8 +66,8 @@ class tree:
 	def __init__(self):
 		self.list_of_nodes=[]
 		self.list_of_nodes.append(node([],[1,2],'root'))
-		self.list_of_nodes.append(node([0],[],'market'))
-		self.list_of_nodes.append(node([0],[],'survey'))
+		self.list_of_nodes.append(node(0,[],'market'))
+		self.list_of_nodes.append(node(0,[],'survey'))
 		self.list_of_nodes[2].posteriors=PRIORS
 		self.list_of_nodes[1].posteriors=PRIORS
 		self.string_representation=[]
@@ -105,6 +106,20 @@ class tree:
 	#number of node in a tree
 	def len(self):
 		return(len(self.list_of_nodes))
+	#returns the number of surveys done before the node, including that node
+	def surveys_before(self,node):
+		node_number=node
+		surveys_before=0
+		while(self.list_of_nodes[node_number].node_type != 'root'):
+			if (self.list_of_nodes[node_number].node_type=='survey'):
+				surveys_before +=1
+			node_number=self.list_of_nodes[node_number].parent
+		return surveys_before
+
+	def update_end_node_values(self):
+		for i in reversed(range(len(self.list_of_nodes))):
+			if (self.list_of_nodes[i].node_type == 'end'):
+				self.list_of_nodes[i].expected_value -= self.surveys_before(i)*SURVEYCOST
 
 	#method used to update expected values after tree is created
 	def update_expected_values(self):
@@ -172,6 +187,7 @@ add_layer(t,'outcome')
 add_layer(t,'decision')
 add_layer(t,'outcome')
 add_layer(t,'end')
+t.update_end_node_values()
 t.update_expected_values()
 print(t)
 t.toCSV()
