@@ -18,7 +18,7 @@ def survey_outcome_odds(priors):
 			joint_sum = joint_sum+hh.pmf(j)*priors[i]
 		probablities[j]=joint_sum	
 	return probablities
-#methid to multiply a list with one value
+#method to multiply a list with one value
 def list_one_multiply(a,b):
 	new_list = []
 	for i in range(len(a)):
