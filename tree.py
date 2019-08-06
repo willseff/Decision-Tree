@@ -44,23 +44,18 @@ def list_divide(a,d):
 #node class stores data about each node
 class node:
     def __init__(self,p,c,t):
-
         self.parent = p
         self.children = c
         self.node_type = t
         self.posteriors = []
         self.expected_value = 0
         self.decision=''
-        self.history=[]
     #string representation of tree
     def __str__(self):
     	return 'Parent '+str(self.parent)+' Children '+str(self.children) + ' posteriors ' + str(self.posteriors) + 'nodeType ' + str(self.node_type) + ' eValue ' + str(self.expected_value) + ' decision ' + str(self.decision)
     #add a child to node, inputs are the node number of the child
     def add_child(self,node):
     	self.children.append(node)
-    #unused method as of now. can be used to keep track of the history of the child nodes before a node
-    def add_history(self,event):
-    	self.history.append(event)
 
 #tree class implements tree 
 class tree:
@@ -119,14 +114,14 @@ class tree:
 		return surveys_before
 	#changes the end values by subtracting the survey values of all the surveys done before
 	def update_end_node_values(self):
-		for i in reversed(range(len(self.list_of_nodes))):
+		for i in reversed(range(self.len())):
 			if (self.node(i).node_type == 'end'):
 				self.node(i).expected_value -= self.surveys_before(i)*SURVEYCOST
 
-	#method used to update expected values after tree is created
+	#method used to update expected values after tree is created quite complex because every type of node has a different script
 	def update_expected_values(self):
 		#use after placing end nodes
-		for i in reversed(range(len(self.list_of_nodes))):
+		for i in reversed(range(self.len())):
 			#if node is end node there is no need to update expected values because the expected value was there there tree initialized
 			if (self.node(i).node_type == 'end'):
 				pass
@@ -156,11 +151,12 @@ class tree:
 			elif(self.node(i).node_type == 'market'):
 				child = self.child(i,0)
 				self.node(i).expected_value = child.expected_value
-
 	def child(self,i,k):
 		#returns kth the child node for node i
 		return self.list_of_nodes[self.list_of_nodes[i].children[k]]
+
 #methods used to add layers to a tree. Can be a outcome or decision or end layer. Last layer must be an end layer
+#why is this method not in the treee class, considering adding it to the tree class???
 def add_layer(tree,layer_type):
 	if (layer_type == 'decision'):
 		for i in range(tree.len()):
