@@ -3,11 +3,12 @@ import scipy.stats as ss
 import csv
 
 #likelyhoods are not correct values right now, Will need to changed based on what the priors are
-LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
+#LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
 MARKETVALUE = 10000000
-MARKETSHARES = [0.1,0.2,0.4,0.6,0.8]
 PRIORS = [0.2,0.2,0.2,0.2,0.2]
-SURVEYCOST = 1000000000
+MARKETSHARES = [0.3,0.4,0.5,0.6,0.7]
+SURVEYCOST = 10250
+LIKELIHOODS = [[0.1176,0.0466,0.01563,0.0041,0.00073],[0.3,0.18,0.093,0.036,0.01],[0.32,0.311,0.234,0.14,0.059],[0.185,0.276,0.312,0.276,0.18],[0.059,0.138,0.234,0.311,0.324],[0.01,0.0368,0.093,0.186,0.3]]
 #method to return the odds of each survey result happening based on the probabliities
 def survey_outcome_odds(priors):
 	probablities = [0,0,0,0,0,0]
