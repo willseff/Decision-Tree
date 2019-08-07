@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.stats as ss
 import csv
-
 #likelyhoods are not correct values right now, Will need to changed based on what the priors are
 #LIKELIHOODS = [[0,0.4096,0.2592,0.0768,0.0064],[0,0.3,0.423,0.04,0.9],[0,123,0.84,0.41,0.6],[0,0.4096,0.2592,0.7868,0.564],[0,0.396,0.2592,0.568,0.864],[0,0.4696,0.4592,0.665,34]]
 MARKETVALUE = 10000000
@@ -92,6 +91,9 @@ class tree:
 		for i in range(len(self.list_of_nodes)):
 			self.string_representation.append([i,self.node(i).parent,self.node(i).children,self.node(i).posteriors,self.node(i).node_type,self.node(i).expected_value,self.node(i).decision])
 		return str(self.string_representation)
+	def child(self,i,k):
+		#returns kth the child node for node i
+		return self.list_of_nodes[self.list_of_nodes[i].children[k]]
 	#export to csv
 	def toCSV(self):
 		with open("out.csv", "w", newline="") as f:
@@ -151,9 +153,6 @@ class tree:
 			elif(self.node(i).node_type == 'market'):
 				child = self.child(i,0)
 				self.node(i).expected_value = child.expected_value
-	def child(self,i,k):
-		#returns kth the child node for node i
-		return self.list_of_nodes[self.list_of_nodes[i].children[k]]
 
 #methods used to add layers to a tree. Can be a outcome or decision or end layer. Last layer must be an end layer
 #why is this method not in the treee class, considering adding it to the tree class???
@@ -174,7 +173,6 @@ def add_layer(tree,layer_type):
 		for i in range(tree.len()):
 			if (not tree.node(i).children):
 				tree.add_node(node(i,[],'end'))
-
 #example construction of tree
 t = tree()
 add_layer(t,'outcome')
