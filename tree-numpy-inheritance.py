@@ -19,10 +19,10 @@ class Node:
     	self.children.append(node)
 
     def __str__ (self):
-    	return f'{self.node_number}'
+    	return str(self.node_number)
 
     def __repr__(self):
-    	return node_number
+    	return self.node_number
 
     @property
     def posteriors(self):
@@ -33,7 +33,7 @@ class Node:
 
     @classmethod
     def increment_node(cls):
-    	cls.node_number=+1
+    	cls.node_number+=1
 
 class DecisionNode(Node):
     def __init__ (self,parent=None,child=[],value =''):
@@ -76,8 +76,8 @@ class Tree(list):
         self.append(Node(parent=None,child=[]))#node 0
         self.add_node(parent = self[0],child=[],node_class= DecisionNode, value= 'market')#node 1
         self.add_node(parent = self[0],child=[], node_class = DecisionNode, value = 'survey')#node 2
-        for i in range(6):
-        	self.add_node(parent = self[2],child=[], node_class = OutcomeNode, value = i)
+        for i in range(6): #nodes 3 to 7
+        	self.add_node(parent = self[2],child=[], node_class = OutcomeNode, value = i) 
 
     def add_node(self,parent,child,node_class,value):
     	new_node=node_class(parent = parent, child = child, value= value)
@@ -91,6 +91,6 @@ class Tree(list):
 
 t = Tree()
 print(id(t[1].parent), id(t[0]))
-print(t[0])
+print(t[5])
 
-print(t)
+print(t[0].children)

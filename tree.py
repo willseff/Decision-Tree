@@ -41,13 +41,13 @@ def list_divide(a,d):
 	return new_list
 
 #node class stores data about each node
-class node:
-    def __init__(self,p,c,t):
-        self.parent = p
-        self.children = c
-        self.node_type = t
-        self.posteriors = []
-        self.expected_value = 0
+class Node:
+    def __init__(self,parent=[],child=[],type,posteriors=[],expected_value=0):
+        self.parent = parent
+        self.children = child
+        self.node_type = type
+        self.posteriors = posteriors
+        self.expected_value = expected_value
         self.decision=''
     #string representation of tree
     def __str__(self):
@@ -57,111 +57,24 @@ class node:
     	self.children.append(node)
 
 #tree class implements tree 
-class tree:
-	def __init__(self):
+class Tree(list):
+	def __init__(self,layers):
 		#intialize tree one root node with a survey or market node
-		self.list_of_nodes=[]
-		self.list_of_nodes.append(node([],[1,2],'root'))
-		self.list_of_nodes.append(node(0,[],'market'))
-		self.list_of_nodes.append(node(0,[],'survey'))
-		self.list_of_nodes[2].posteriors=PRIORS
-		self.list_of_nodes[1].posteriors=PRIORS
+		super().__init__()
+
+		self.append(node([],[1,2],'root'))
+		self.append(node(0,[],'market'))
+		self.append(node(0,[],'survey'))
+		self[2].posteriors=PRIORS
+		self[1].posteriors=PRIORS
 		self.string_representation=[]
 
-	# method for adding nodes. Certain node types will have differnt posteriors based on the node before it's posteroir values
-	def add_node(self,node):
-		priors = self.node(node.parent).posteriors
-		#update posteriors if the node is a survey result
-		if (node.node_type in [0,1,2,3,4,5]):
-			joint_probablity = list_multiply(priors,LIKELIHOODS[node.node_type])
-			sum_joint = sum(joint_probablity)
-			node.posteriors = list_divide(joint_probablity,sum_joint)
-		#if not survey result then the posteroirs stay the same
-		else:
-			node.posteriors = priors
-		# if there is an end node the expected value will equal the posteroirs multiplied by the revenue of each case
-		if (node.node_type == 'end'):
-			values = list_one_multiply(MARKETSHARES,MARKETVALUE)
-			node.expected_value = sum(list_multiply(values,node.posteriors))
-
-		self.list_of_nodes.append(node)
-		self.list_of_nodes[node.parent].children.append(len(self.list_of_nodes)-1)
-	#string represntation of the tree. prints out all nodes
-	def __str__(self):
-		for i in range(len(self.list_of_nodes)):
-			self.string_representation.append([i,self.node(i).parent,self.node(i).children,self.node(i).posteriors,self.node(i).node_type,self.node(i).expected_value,self.node(i).decision])
-		return str(self.string_representation)
-	def child(self,i,k):
-		#returns kth the child node for node i
-		return self.list_of_nodes[self.list_of_nodes[i].children[k]]
-	#export to csv
-	def toCSV(self):
-		with open("out.csv", "w", newline="") as f:
-			writer = csv.writer(f)
-			writer.writerows(self.string_representation)
-	# returns a specific nod 
-	def node(self,number):
-		return self.list_of_nodes[number]
-	#number of node in a tree
-	def len(self):
-		return(len(self.list_of_nodes))
-	#returns the number of surveys done before the node, including that node
-	def surveys_before(self,node):
-		node_number=node
-		surveys_before=0
-		while(self.node(node_number).node_type != 'root'):
-			if (self.node(node_number).node_type=='survey'):
-				surveys_before +=1
-			node_number=self.node(node_number).parent
-		return surveys_before
-	#changes the end values by subtracting the survey values of all the surveys done before
-	def update_end_node_values(self):
-		for i in reversed(range(self.len())):
-			if (self.node(i).node_type == 'end'):
-				self.node(i).expected_value -= self.surveys_before(i)*SURVEYCOST
-
-	#method used to update expected values after tree is created quite complex because every type of node has a different script
-	def update_expected_values(self):
-		#use after placing end nodes
-		for i in reversed(range(self.len())):
-			#if node is end node there is no need to update expected values because the expected value was there there tree initialized
-			if (self.node(i).node_type == 'end'):
-				pass
-			#if node is survey then the expected value will equal the probablities of each survey outcome multiplied by the expected value of each survey outcome
-			elif(self.node(i).node_type == 'survey'):
-				probablities = survey_outcome_odds(self.node(i).posteriors)
-				expected_value=0
-				#iterating through all the children of that node
-				for k in range(6):
-					nodek = self.child(i,k)
-					expected_value=expected_value + (probablities[k] * nodek.expected_value)
-				self.node(i).expected_value = expected_value
-			#if node type is a survey outcome then the expected value will be the larger of the two of the next decision layer. Or if its an end node then it will equal the expected value of the end node
-			elif(self.node(i).node_type in range(6)):
-				if (self.child(i,0).node_type=='end'):
-					self.node(i).expected_value = self.child(i,0).expected_value
-				else:
-					child1 = self.child(i,0)
-					child2 = self.child(i,1)
-					if(child1.expected_value>=child2.expected_value):
-						self.node(i).decision = 'survey'
-						self.node(i).expected_value = child1.expected_value
-					else:
-						self.node(i).expected_value = child2.expected_value
-						self.node(i).decision = 'market'
-			# if the node is a market node then it will equal the expected value of the end node
-			elif(self.node(i).node_type == 'market'):
-				child = self.child(i,0)
-				self.node(i).expected_value = child.expected_value
-
-#methods used to add layers to a tree. Can be a outcome or decision or end layer. Last layer must be an end layer
-#why is this method not in the treee class, considering adding it to the tree class???
-def add_layer(tree,layer_type):
+	def add_layer(self,layer_type):
 	if (layer_type == 'decision'):
-		for i in range(tree.len()):
-			if (not tree.node(i).children and tree.node(i).node_type != 'market'):
-				tree.add_node(node(i,[],'survey'))
-				tree.add_node(node(i,[],'market'))
+		for node in self:
+			if (not node.children and node.node_type != 'market'):
+				self.add_node(i,[],'survey')
+				self.add_node(i,[],'market')
 
 	if (layer_type == 'outcome'):
 		for i in range(tree.len()):
@@ -173,6 +86,91 @@ def add_layer(tree,layer_type):
 		for i in range(tree.len()):
 			if (not tree.node(i).children):
 				tree.add_node(node(i,[],'end'))
+
+	# method for adding nodes. Certain node types will have differnt posteriors based on the node before it's posteroir values
+	def add_node(self,parent,child,node_type):
+		priors = self[parent].posteriors
+		#update posteriors if the node is a survey result
+		if (node_type in [0,1,2,3,4,5]):
+			joint_probablity = list_multiply(priors,LIKELIHOODS[node_type])
+			sum_joint = sum(joint_probablity)
+			posteriors = list_divide(joint_probablity,sum_joint)
+		#if not survey result then the posteroirs stay the same
+		else:
+			posteriors = priors
+		# if there is an end node the expected value will equal the posteroirs multiplied by the revenue of each case
+		if (node_type == 'end'):
+			values = list_one_multiply(MARKETSHARES,MARKETVALUE)
+			expected_value = sum(list_multiply(values,node.posteriors))
+		node= Node(parent = parent, child = child, type =node_type,posteriors=posteriors,expected_value=expected_value)
+		self.append(node)
+		self[parent].children.append(len(self)-1)
+	#string represntation of the tree. prints out all nodes
+	def __str__(self):
+		for i in range(len(self.list_of_nodes)):
+			self.string_representation.append([i,self[i].parent,self[i].children,self[i].posteriors,self[i].node_type,self[i].expected_value,self[i].decision])
+		return str(self.string_representation)
+	def child(self,i,k):
+		#returns kth the child node for node i
+		return self[self[i].children[k]]
+	#export to csv
+	def toCSV(self):
+		with open("out.csv", "w", newline="") as f:
+			writer = csv.writer(f)
+			writer.writerows(self.string_representation)
+
+	#returns the number of surveys done before the node, including that node
+	def surveys_before(self,node):
+		node_number=node
+		surveys_before=0
+		while(self[node_number].node_type != 'root'):
+			if (self[node_number].node_type=='survey'):
+				surveys_before +=1
+			node_number=self[node_number].parent
+		return surveys_before
+	#changes the end values by subtracting the survey values of all the surveys done before
+	def update_end_node_values(self):
+		for i in reversed(range(self.len())):
+			if (self[i].node_type == 'end'):
+				self[i].expected_value -= self.surveys_before(i)*SURVEYCOST
+
+	#method used to update expected values after tree is created quite complex because every type of node has a different script
+	def update_expected_values(self):
+		#use after placing end nodes
+		for i in reversed(range(self.len())):
+			#if node is end node there is no need to update expected values because the expected value was there there tree initialized
+			if (self[i].node_type == 'end'):
+				pass
+			#if node is survey then the expected value will equal the probablities of each survey outcome multiplied by the expected value of each survey outcome
+			elif(self[i].node_type == 'survey'):
+				probablities = survey_outcome_odds(self[i].posteriors)
+				expected_value=0
+				#iterating through all the children of that node
+				for k in range(6):
+					nodek = self.child(i,k)
+					expected_value=expected_value + (probablities[k] * nodek.expected_value)
+				self[i].expected_value = expected_value
+			#if node type is a survey outcome then the expected value will be the larger of the two of the next decision layer. Or if its an end node then it will equal the expected value of the end node
+			elif(self.node(i).node_type in range(6)):
+				if (self.child(i,0).node_type=='end'):
+					self[i].expected_value = self.child(i,0).expected_value
+				else:
+					child1 = self.child(i,0)
+					child2 = self.child(i,1)
+					if(child1.expected_value>=child2.expected_value):
+						self[i].decision = 'survey'
+						self[i].expected_value = child1.expected_value
+					else:
+						self[i].expected_value = child2.expected_value
+						self[i].decision = 'market'
+			# if the node is a market node then it will equal the expected value of the end node
+			elif(self[i].node_type == 'market'):
+				child = self.child(i,0)
+				self[i].expected_value = child.expected_value
+
+#methods used to add layers to a tree. Can be a outcome or decision or end layer. Last layer must be an end layer
+#why is this method not in the treee class, considering adding it to the tree class???
+
 #example construction of tree
 t = tree()
 add_layer(t,'outcome')
