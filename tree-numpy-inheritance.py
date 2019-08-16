@@ -10,7 +10,7 @@ LIKELIHOODS = [[0.1176,0.0466,0.01563,0.0041,0.00073],[0.3,0.18,0.093,0.036,0.01
 
 class Node:
     node_number = 1
-    def __init__(self,parent=[]):
+    def __init__(self,parent):
         self.parent = parent
         self.node_number = Node.node_number
         self.value = 'root'
@@ -36,7 +36,7 @@ class Node:
             string += str(child) + ' '
         return string
 class DecisionNode(Node):
-    def __init__ (self,parent=None,value =''):
+    def __init__ (self,parent,value =''):
 
         super().__init__(parent=parent)
 
@@ -57,13 +57,13 @@ class OutcomeNode(Node):
     @property
     def posteriors(self):
         priors = self.parent.posteriors
-        joint_probablity = priors*LIKELIHOODS[survey_results]
+        joint_probablity = priors*LIKELIHOODS[self.value]
         sum_joint = sum(joint_probablity)
         posteriors = joint_probablity/sum_joint
         return posteriors
 
 class EndNode(Node):
-    def __init__ (self,parent=[],prior_surveys=0):
+    def __init__ (self,parent,prior_surveys=0):
         child =None
         super().__init__(parent=parent)
 
@@ -84,27 +84,28 @@ class Tree(list):
         for i in range(6): #nodes 3 to 7
         	self.add_node(parent = self[2], node_class = OutcomeNode, value = 1) 
 
-        #print(self[2].see_children())
-
     def add_layer(self):
+        for node in self:
+            if (not node.children and node.value in range(6)):
+                self.add_node(parent = node,node_class =DecisionNode,value ='market')
+                self.add_node(parent = node,node_class =DecisionNode,value ='survey')
+
+        for node in self:
+            if(not node.children and node.value == 'survey'):
+                for k in range(6):
+                    self.add_node(parent = node, node_class = OutcomeNode, value =k)
+
+    def add_node(self,parent,node_class,value):
+        new_node=node_class(parent = parent, value= value)
+        self.append(new_node)
+        parent.add_child(new_node)
+        Node.increment_node()
+
+    def print_tree(self):
         for node in self:
             print(f'node number {node}  node type {node.value}')
             print (f'chidren {node.see_children()}, parent {str(node.parent)}')
-            #if (not node.children and node.value != 'market'):
-                #self.add_node(parent = node,node_class =DecisionNode,value ='market')
-                #self.add_node(parent = node,node_class =DecisionNode,value ='survey')
-
-        # for node in self:
-        #     if(not node.children and node.value == 'survey'):
-        #         for k in range(6):
-        #             self.add_node(parent = node, node_class = OutcomeNode, value =k)
-
-
-    def add_node(self,parent,node_class,value):
-    	new_node=node_class(parent = parent, value= value)
-    	self.append(new_node)
-    	parent.add_child(new_node)
-    	Node.increment_node()
+            print(f'posteriors {node.posteriors}')
 
 
 
@@ -113,6 +114,7 @@ class Tree(list):
 
 t = Tree()
 t.add_layer()
+t.print_tree()
 #print(id(t[1].parent), id(t[0]))
 #print(t[5])
 
