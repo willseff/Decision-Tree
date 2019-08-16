@@ -46,6 +46,10 @@ class DecisionNode(Node):
     @property
     def posteriors(self):
         return np.copy(self.parent.posteriors)
+
+    @property 
+    def expected_value(self):
+    	return
     
 
 
@@ -58,17 +62,15 @@ class OutcomeNode(Node):
 
     @property
     def posteriors(self):
-        print(self)
         priors = self.parent.posteriors
-        print(priors)
         joint_probablity = priors*LIKELIHOODS[self.value]
-        print(LIKELIHOODS[self.value])
-        print(joint_probablity)
-        print(sum(joint_probablity))
         posteriors = joint_probablity/sum(joint_probablity)
-        print(posteriors)
-        print('wtf')
         return posteriors
+
+    @property 
+    def expected_value(self):
+    	pass
+
 
 
 
@@ -82,10 +84,10 @@ class EndNode(Node):
     def posteriors(self):
     	return np.copy(self.parent.posteriors)
 
-    # @property
-    # def expected_value(self):
-    # 	expected_value = self.posteriors
-    # 	return 
+    @property
+    def expected_value(self):
+        expected_value = self.posteriors*MARKETSHARES*MARKETVALUE
+        return 
     
 
 
@@ -121,13 +123,16 @@ class Tree(list):
         parent.add_child(new_node)
         Node.increment_node()
 
-    def posters(self):
+    def posteriors(self):
    	    for node in self:
    	        node.posteriors
 
+   	def expected_value(self):
+   		for node in self[::-1]
+   			node.expected_value
+
     def print_tree(self):
         for node in self:
-        
             print(f'node number {node}  node type {node.value}')
             print (f'chidren {node.see_children()}, parent {str(node.parent)}')
             print(f'posteriors {node.posteriors}, ')
