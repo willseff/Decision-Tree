@@ -64,6 +64,7 @@ class DecisionNode(Node):
             children_expected_values=[]
             for child in self.children:
                 children_expected_values.append(child.expected_value)
+            
             children_expected_values=np.array(children_expected_values)    
             probablities = [0,0,0,0,0,0]
             for j in range(6):

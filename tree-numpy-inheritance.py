@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.stats as ss
 import csv
 from nodes import *
 
@@ -55,10 +54,6 @@ class Tree(list):
             print (f'chidren {node.see_children()}, parent {str(node.parent)}')
             print(f'posteriors {node.posteriors}, ')
             print(f'expected_value {node.expected_value}')
-
-
-
-
 
 
 t = Tree()
